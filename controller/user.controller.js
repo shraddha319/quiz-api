@@ -22,19 +22,13 @@ const updateUserById = async (req, res, next) => {
   const { user } = req;
   deepMerge(user, update);
   await user.save();
-  // res.status(204).json({ status: 'success' });
   return sendResponse({ res, success: true, statusCode: 204 });
 };
 
 const deleteUserById = async (req, res, next) => {
   const { user } = req;
   const removedUser = await user.remove();
-  // res.json({
-  //   status: 'success',
-  //   data: {
-  //     userId: removedUser._id,
-  //   },
-  // });
+
   return sendResponse({
     res,
     success: true,
