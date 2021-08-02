@@ -2,12 +2,13 @@ require('dotenv').config();
 
 const express = require('express');
 const { json } = require('body-parser');
-const { PORT } = require('./config');
+const { PORT, NODE_ENV } = require('./config');
 const { connectDB } = require('./lib/index');
 const errorHandler = require('./middleware/errorHandler');
 const notFoundHandler = require('./middleware/notFoundHandler');
 const userRouter = require('./routes/user.routes');
 const authRouter = require('./routes/auth.routes');
+const quizRouter = require('./models/quiz.model');
 
 connectDB();
 
@@ -22,6 +23,7 @@ app.get('/', (req, res) => {
 
 app.use('/auth', authRouter);
 app.use('/user', userRouter);
+app.use('/quiz', quizRouter);
 
 /**
  * 404 Error handler
@@ -35,6 +37,8 @@ app.all('*', notFoundHandler);
  */
 app.use(errorHandler);
 
-app.listen(port, () => {
-  console.log('server listening on port: ', port);
-});
+if (NODE_ENV !== 'test')
+  app.listen(port, () => {
+    console.log('server listening on port: ', port);
+  });
+else module.exports = app;
