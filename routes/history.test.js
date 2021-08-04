@@ -147,7 +147,27 @@ describe('Testing /history endpoint for quiz api', () => {
   });
 
   test('should create a new History document on POST /history with valid quizId and score param', async () => {
-    expect(1).toBe(0);
+    const quiz = await Quiz.find({});
+    const quizId = quiz[0]._id;
+    const score = 10;
+    const { userId, authToken } = testUsers[0];
+
+    const { statusCode } = await request(app)
+      .post('/history')
+      .set('Authorization', authToken)
+      .send({
+        quizId,
+        score,
+        userId,
+      });
+
+    const history = await History.find({ quiz: quizId, user: userId });
+    expect(statusCode).toBe(204);
+    expect(history.length).toBe(1);
+    expect(history[0].user.toString()).toBe(userId.toString());
+    expect(history[0].quiz.toString()).toBe(quizId.toString());
+    expect(history[0].score).toBe(score);
+    expect(history[0].updatedAt).toBeTruthy();
   });
 
   test('should update existing score field in History document on POST /history with valid quizId and score param', async () => {
