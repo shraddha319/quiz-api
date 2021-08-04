@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const QuizSchema = mongoose.Schema({
+const quizSchema = mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -17,8 +17,8 @@ const QuizSchema = mongoose.Schema({
       },
       options: [
         {
-          value: String,
-          isCorrect: Boolean,
+          option: String,
+          isRight: Boolean,
         },
       ],
       points: {
@@ -29,6 +29,6 @@ const QuizSchema = mongoose.Schema({
   ],
 });
 
-const Quiz = mongoose.model('Quiz', QuizSchema);
+const Quiz = mongoose.model('Quiz', quizSchema);
 
 module.exports = Quiz;
