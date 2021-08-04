@@ -170,15 +170,37 @@ describe('Testing /history endpoint for quiz api', () => {
     expect(history[0].updatedAt).toBeTruthy();
   });
 
-  test('should update existing score field in History document on POST /history with valid quizId and score param', async () => {
-    expect(1).toBe(0);
+  test.only('should update score field in existing History document on POST /history with valid quizId and score param', async () => {
+    const quiz = await Quiz.find({});
+    const quizId = quiz[0]._id;
+    const score = 10;
+    const newScore = 20;
+    const { userId, authToken } = testUsers[0];
+    await request(app).post('/history').set('Authorization', authToken).send({
+      quizId,
+      score,
+      userId,
+    });
+
+    await request(app).post('/history').set('Authorization', authToken).send({
+      quizId,
+      score: newScore,
+      userId,
+    });
+
+    const history = await History.find({ quiz: quizId, user: userId });
+    expect(history.length).toBe(1);
+    expect(history[0].user.toString()).toBe(userId.toString());
+    expect(history[0].quiz.toString()).toBe(quizId.toString());
+    expect(history[0].score).toBe(newScore);
+    expect(history[0].updatedAt).toBeTruthy();
   });
 
   test('should return leaderboard containing aggregated points on POST /history with type="leaderboard"', async () => {
     expect(1).toBe(0);
   });
 
-  test.only('should return player history on GET /history with no type data', async () => {
+  test('should return player history on GET /history with no type data', async () => {
     const quiz = await Quiz.find({});
     const quizId = quiz[0]._id;
     const score = 10;
