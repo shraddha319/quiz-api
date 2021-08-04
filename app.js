@@ -8,7 +8,8 @@ const errorHandler = require('./middleware/errorHandler');
 const notFoundHandler = require('./middleware/notFoundHandler');
 const userRouter = require('./routes/user.routes');
 const authRouter = require('./routes/auth.routes');
-const quizRouter = require('./models/quiz.model');
+const quizRouter = require('./routes/quiz.routes');
+const historyRouter = require('./routes/history.routes');
 
 connectDB();
 
@@ -24,6 +25,7 @@ app.get('/', (req, res) => {
 app.use('/auth', authRouter);
 app.use('/user', userRouter);
 app.use('/quiz', quizRouter);
+app.use('/history', historyRouter);
 
 /**
  * 404 Error handler
