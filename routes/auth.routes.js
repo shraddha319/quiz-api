@@ -18,16 +18,16 @@ const {
 
 router.route('/login').post(
   catchAsync(async (req, res, next) => {
-    const { email, password } = req.body;
-    if (!email || !password)
+    const { email, username, password } = req.body;
+    if (!((email || username) && password))
       return next(
         new ApplicationError(INVALID_PARAMETERS, {
-          message: 'Email and password are required to authenticate',
+          message: 'Email/Username and password are required to authenticate',
         }),
       );
-
-    const user = await User.findOne({ email });
-
+    let user;
+    if (email) user = await User.findOne({ email });
+    else user = await User.findOne({ username });
     if (!user)
       return next(
         new ApplicationError(RESOURCE_NOT_FOUND, {
@@ -38,7 +38,11 @@ router.route('/login').post(
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return next(new ApplicationError(AUTHENTICATION_ERROR));
     /** generate jwt token */
-    const authToken = generateToken({ userId: user._id, email: user.email });
+    const authToken = generateToken({
+      userId: user._id,
+      email: user.email,
+      username: user.username,
+    });
 
     return sendResponse({
       res,
