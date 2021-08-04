@@ -3,12 +3,37 @@ const mongoose = require('mongoose');
 const request = require('supertest');
 const app = require('../app');
 const History = require('../models/history.model');
+const Quiz = require('../models/quiz.model');
+const { User } = require('../models/user.model');
 const { ErrorTypes } = require('../lib/index');
 
 const { UNAUTHORIZED, INVALID_PARAMETERS } = ErrorTypes;
 app.listen(3001, () => {
   console.log('listening on port 3001');
 });
+
+const testUser = {
+  username: 'test',
+  email: 'test@email.com',
+  password: 'test12345',
+};
+const testQuiz = {
+  name: 'test quiz',
+  description: 'sample quiz',
+  questions: [
+    {
+      question: 'test quiz question',
+      options: [
+        {
+          option: 'option',
+          isRight: true,
+        },
+      ],
+      points: 1,
+    },
+  ],
+};
+let testAuthToken;
 
 beforeAll(async () => {
   try {
@@ -21,6 +46,17 @@ beforeAll(async () => {
     );
     await History.deleteMany({});
     console.log('DB connected');
+
+    await User.create(testUser);
+    await Quiz.create(testQuiz);
+    const {
+      body: {
+        data: { authToken },
+      },
+    } = await request(app)
+      .post('/auth/login')
+      .send({ email: testUser.email, password: testUser.password });
+    testAuthToken = authToken;
   } catch (err) {
     console.log(err);
   }
@@ -32,6 +68,8 @@ beforeEach(async () => {
 
 afterAll(async () => {
   await mongoose.connection.db.dropCollection('histories');
+  await mongoose.connection.db.dropCollection('users');
+  await mongoose.connection.db.dropCollection('quizzes');
 });
 
 describe('Testing /history endpoint for quiz api', () => {
@@ -59,7 +97,7 @@ describe('Testing /history endpoint for quiz api', () => {
     const {
       body: { error },
       statusCode,
-    } = await request(app).post('/history');
+    } = await request(app).post('/history').set('Authorization', testAuthToken);
     expect(error.name).toBe('ApplicationError');
     expect(statusCode).toBe(INVALID_PARAMETERS.statusCode);
     expect(error.code).toBe(INVALID_PARAMETERS.code);
