@@ -14,7 +14,7 @@ const router = express.Router();
 
 router.route('/').post(catchAsync(postNewUser));
 
-router.use('/:userId', catchAsync(validateUserId), tokenVerifier);
+router.use('/:userId', tokenVerifier, catchAsync(validateUserId));
 
 router
   .route('/:userId')
