@@ -40,7 +40,7 @@ router
       return sendResponse({
         res,
         success: true,
-        payload: { user: userHistory },
+        payload: { history: userHistory },
       });
     }),
   )
