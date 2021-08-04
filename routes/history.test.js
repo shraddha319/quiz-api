@@ -178,7 +178,28 @@ describe('Testing /history endpoint for quiz api', () => {
     expect(1).toBe(0);
   });
 
-  test('should return player history on POST /history with no type data', () => {
-    expect(1).toBe(0);
+  test.only('should return player history on GET /history with no type data', async () => {
+    const quiz = await Quiz.find({});
+    const quizId = quiz[0]._id;
+    const score = 10;
+    const { userId, authToken } = testUsers[0];
+    await request(app).post('/history').set('Authorization', authToken).send({
+      quizId,
+      score,
+      userId,
+    });
+
+    const {
+      body: {
+        data: { history },
+      },
+      statusCode,
+    } = await request(app).get('/history').set('Authorization', authToken);
+    expect(statusCode).toBe(200);
+    expect(history.length).toBe(1);
+    expect(history[0].user.toString()).toBe(userId.toString());
+    expect(history[0].quiz.toString()).toBe(quizId.toString());
+    expect(history[0].score).toBe(score);
+    expect(history[0].updatedAt).toBeTruthy();
   });
 });
