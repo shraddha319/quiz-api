@@ -2,24 +2,25 @@
   "name": "quiz-api",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
-    "start": "nodemon --watch index.js",
-    "lint": "./node_modules/.bin/eslint index.js"
+    "start": "nodemon --delay 500ms --watch app.js",
+    "clean": "kill -9 $(lsof -t -i:3001)",
+    "lint": "./node_modules/.bin/eslint app.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shraddha319/REST-API-boilerplate.git"
+    "url": "git+https://github.com/shraddha319/quiz-api.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/shraddha319/REST-API-boilerplate/issues"
+    "url": "https://github.com/shraddha319/quiz-api/issues"
   },
-  "homepage": "https://github.com/shraddha319/REST-API-boilerplate#readme",
+  "homepage": "https://github.com/shraddha319/quiz-api#readme",
   "dependencies": {
     "bcrypt": "^5.0.1",
     "body-parser": "^1.19.0",
