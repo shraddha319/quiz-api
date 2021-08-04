@@ -12,28 +12,57 @@ app.listen(3001, () => {
   console.log('listening on port 3001');
 });
 
-const testUser = {
-  username: 'test',
-  email: 'test@email.com',
-  password: 'test12345',
-};
-const testQuiz = {
-  name: 'test quiz',
-  description: 'sample quiz',
-  questions: [
-    {
-      question: 'test quiz question',
-      options: [
-        {
-          option: 'option',
-          isRight: true,
-        },
-      ],
-      points: 1,
-    },
-  ],
-};
-let testAuthToken;
+const testUsers = [
+  {
+    username: 'test1',
+    email: 'test1@email.com',
+    password: 'test012345',
+    authToken: null,
+    userId: null,
+  },
+  {
+    username: 'test2',
+    email: 'test2@email.com',
+    password: 'test56789',
+    authToken: null,
+    userId: null,
+  },
+];
+
+const testQuiz = [
+  {
+    name: 'test quiz 1',
+    description: 'test quiz 1',
+    questions: [
+      {
+        question: 'test quiz question 1',
+        options: [
+          {
+            option: 'option',
+            isRight: true,
+          },
+        ],
+        points: 1,
+      },
+    ],
+  },
+  {
+    name: 'test quiz 2',
+    description: 'test quiz 2',
+    questions: [
+      {
+        question: 'test quiz question 2',
+        options: [
+          {
+            option: 'option',
+            isRight: true,
+          },
+        ],
+        points: 1,
+      },
+    ],
+  },
+];
 
 beforeAll(async () => {
   try {
@@ -47,16 +76,28 @@ beforeAll(async () => {
     await History.deleteMany({});
     console.log('DB connected');
 
-    await User.create(testUser);
+    await User.create(testUsers);
     await Quiz.create(testQuiz);
-    const {
-      body: {
-        data: { authToken },
-      },
-    } = await request(app)
-      .post('/auth/login')
-      .send({ email: testUser.email, password: testUser.password });
-    testAuthToken = authToken;
+
+    //   testUsers.forEach(async (user, index, arr) => {
+    //     const {
+    //       body: {
+    //         data: { authToken },
+    //       },
+    //     } = await request(app)
+    //       .post('/auth/login')
+    //       .send({ email: user.email, password: user.password });
+    //     arr[index].authToken = authToken;
+    // });
+    for (let it = 0; it < testUsers.length; it += 1) {
+      const {
+        body: { data },
+      } = await request(app)
+        .post('/auth/login')
+        .send({ email: testUsers[it].email, password: testUsers[it].password });
+      testUsers[it].authToken = data.authToken;
+      testUsers[it].userId = data.userID;
+    }
   } catch (err) {
     console.log(err);
   }
@@ -97,7 +138,9 @@ describe('Testing /history endpoint for quiz api', () => {
     const {
       body: { error },
       statusCode,
-    } = await request(app).post('/history').set('Authorization', testAuthToken);
+    } = await request(app)
+      .post('/history')
+      .set('Authorization', testUsers[0].authToken);
     expect(error.name).toBe('ApplicationError');
     expect(statusCode).toBe(INVALID_PARAMETERS.statusCode);
     expect(error.code).toBe(INVALID_PARAMETERS.code);
