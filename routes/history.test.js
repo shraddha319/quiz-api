@@ -1,3 +1,5 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-undef */
 const mongoose = require('mongoose');
 const request = require('supertest');
@@ -170,7 +172,7 @@ describe('Testing /history endpoint for quiz api', () => {
     expect(history[0].updatedAt).toBeTruthy();
   });
 
-  test.only('should update score field in existing History document on POST /history with valid quizId and score param', async () => {
+  test('should update score field in existing History document on POST /history with valid quizId and score param', async () => {
     const quiz = await Quiz.find({});
     const quizId = quiz[0]._id;
     const score = 10;
@@ -196,8 +198,59 @@ describe('Testing /history endpoint for quiz api', () => {
     expect(history[0].updatedAt).toBeTruthy();
   });
 
-  test('should return leaderboard containing aggregated points on POST /history with type="leaderboard"', async () => {
-    expect(1).toBe(0);
+  test('should return leaderboard containing aggregated points in desc order by updatedAt field on POST /history with type="leaderboard"', async () => {
+    const quiz = await Quiz.find({});
+    const testHistory = {
+      [testUsers[0].authToken]: [
+        {
+          quizId: quiz[0]._id,
+          score: 11,
+        },
+        {
+          quizId: quiz[1]._id,
+          score: 20,
+        },
+      ],
+      [testUsers[1].authToken]: [
+        {
+          quizId: quiz[0]._id,
+          score: 25,
+        },
+      ],
+    };
+    for (const token of Object.keys(testHistory)) {
+      for (const q of testHistory[token]) {
+        await request(app)
+          .post('/history')
+          .set('Authorization', token)
+          .send({ quizId: q.quizId, score: q.score });
+      }
+    }
+    const expected = [
+      {
+        _id: testUsers[0].userId,
+        points: 31,
+        timestamp: expect.any(String),
+      },
+      {
+        _id: testUsers[1].userId,
+        points: 25,
+        timestamp: expect.any(String),
+      },
+    ];
+
+    const {
+      body: {
+        data: { leaderboard },
+      },
+      statusCode,
+    } = await request(app)
+      .get('/history')
+      .set('Authorization', testUsers[0].authToken)
+      .send({ type: 'leaderboard' });
+
+    expect(statusCode).toBe(200);
+    expect(leaderboard).toEqual(expect.arrayContaining(expected));
   });
 
   test('should return player history on GET /history with no type data', async () => {
