@@ -6,7 +6,8 @@
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
-    "start": "nodemon --delay 500ms --watch app.js",
+    "dev": "nodemon --delay 500ms --watch app.js",
+    "start": "node app.js",
     "clean": "kill -9 $(lsof -t -i:3001)",
     "lint": "./node_modules/.bin/eslint app.js"
   },
