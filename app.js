@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const express = require('express');
 const { json } = require('body-parser');
+const cors = require('cors');
 const { PORT, NODE_ENV } = require('./config');
 const { connectDB } = require('./lib/index');
 const errorHandler = require('./middleware/errorHandler');
@@ -11,12 +12,13 @@ const authRouter = require('./routes/auth.routes');
 const quizRouter = require('./routes/quiz.routes');
 const historyRouter = require('./routes/history.routes');
 
-connectDB();
+if (NODE_ENV !== 'test') connectDB();
 
 const app = express();
 const port = PORT || 3000;
 
 app.use(json());
+app.use(cors());
 
 app.get('/', (req, res) => {
   res.send('Hello, world!');
