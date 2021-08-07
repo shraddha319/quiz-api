@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const request = require('supertest');
 const app = require('../app');
 const { User } = require('../models/user.model');
-const { ErrorTypes } = require('../lib/index');
+const { ErrorTypes } = require('../lib');
+const { DB_CONNECTION_STRING } = require('../config');
 
 const { VALIDATION_ERROR } = ErrorTypes;
 
@@ -13,13 +14,10 @@ const server = app.listen(3001, () => {
 
 beforeAll(async () => {
   try {
-    await mongoose.connect(
-      'mongodb+srv://shraddha:Shekar@560037BEN@cluster0.xnwmi.mongodb.net/test?retryWrites=true&w=majority',
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      },
-    );
+    await mongoose.connect(DB_CONNECTION_STRING, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
     await User.deleteMany({});
   } catch (err) {
     console.log(err);

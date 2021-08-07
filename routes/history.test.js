@@ -7,7 +7,8 @@ const app = require('../app');
 const History = require('../models/history.model');
 const Quiz = require('../models/quiz.model');
 const { User } = require('../models/user.model');
-const { ErrorTypes } = require('../lib/index');
+const { ErrorTypes } = require('../lib');
+const { DB_CONNECTION_STRING } = require('../config');
 
 const { UNAUTHORIZED, INVALID_PARAMETERS } = ErrorTypes;
 const server = app.listen(3001, () => {
@@ -66,13 +67,10 @@ let testQuiz = [
 
 beforeAll(async () => {
   try {
-    await mongoose.connect(
-      'mongodb+srv://shraddha:Shekar@560037BEN@cluster0.xnwmi.mongodb.net/test?retryWrites=true&w=majority',
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      },
-    );
+    await mongoose.connect(DB_CONNECTION_STRING, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
     await History.deleteMany({});
     await User.create(testUsers);
     testQuiz = await Quiz.create(testQuiz);
