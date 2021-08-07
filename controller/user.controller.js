@@ -1,5 +1,12 @@
 const { User } = require('../models/user.model');
-const { sendResponse, deepMerge } = require('../lib/index');
+const {
+  sendResponse,
+  deepMerge,
+  ErrorTypes,
+  ApplicationError,
+} = require('../lib');
+
+const { RESOURCE_NOT_FOUND } = ErrorTypes;
 
 const postNewUser = async (req, res, next) => {
   const { user } = req.body;
@@ -38,9 +45,21 @@ const deleteUserById = async (req, res, next) => {
   });
 };
 
+const getUser = async (req, res, next) => {
+  const email = req.header('email');
+  const username = req.header('username');
+
+  let user;
+  if (email) user = await User.findOne({ email });
+  else user = await User.findOne({ username });
+  if (!user) return next(new ApplicationError(RESOURCE_NOT_FOUND));
+  return sendResponse({ res, statusCode: 200 });
+};
+
 module.exports = {
   postNewUser,
   getUserById,
   updateUserById,
   deleteUserById,
+  getUser,
 };

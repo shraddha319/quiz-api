@@ -8,11 +8,12 @@ const {
   getUserById,
   updateUserById,
   deleteUserById,
+  getUser,
 } = require('../controller/user.controller');
 
 const router = express.Router();
 
-router.route('/').post(catchAsync(postNewUser));
+router.route('/').head(catchAsync(getUser)).post(catchAsync(postNewUser));
 
 router.use('/:userId', tokenVerifier, catchAsync(validateUserId));
 
