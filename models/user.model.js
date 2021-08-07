@@ -31,11 +31,19 @@ const userSchema = mongoose.Schema({
 
 userSchema
   .path('email')
-  .validate(validateUniqueField('email', 'User'), '{VALUE} already exists');
+  .validate({
+    validator: validateUniqueField('email', 'User'),
+    message: '{VALUE} already exists',
+    type: 'unique',
+  });
 
 userSchema
   .path('username')
-  .validate(validateUniqueField('username', 'User'), '{VALUE} already exists');
+  .validate({
+    validator: validateUniqueField('username', 'User'),
+    message: '{VALUE} already exists',
+    type: 'unique',
+  });
 
 userSchema.post('validate', async (user, next) => {
   if (!user.isModified('password')) return next();
