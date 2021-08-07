@@ -82,7 +82,7 @@ beforeAll(async () => {
         .post('/auth/login')
         .send({ email: testUsers[it].email, password: testUsers[it].password });
       testUsers[it].authToken = data.authToken;
-      testUsers[it].userId = data.userID;
+      testUsers[it].userId = data.userId;
     }
   } catch (err) {
     console.log(err);

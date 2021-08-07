@@ -47,7 +47,7 @@ router.route('/login').post(
     return sendResponse({
       res,
       success: true,
-      payload: { userID: user._id, authToken },
+      payload: { userId: user._id, authToken },
     });
   }),
 );
