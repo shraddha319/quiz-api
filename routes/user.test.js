@@ -36,6 +36,95 @@ afterAll(async () => {
 });
 
 describe('Testing POST /user endpoint', () => {
+  test('should not register user if required fields are absent.', async () => {
+    /**
+     * email, password, username are required fields
+     * should give VALIDATION_ERROR with status code 400, type required
+     */
+    const expectedValidError = {
+      email: {
+        type: 'required',
+        message: expect.any(String),
+      },
+      username: {
+        type: 'required',
+        message: expect.any(String),
+      },
+      password: {
+        type: 'required',
+        message: expect.any(String),
+      },
+    };
+    const {
+      body: { error, success },
+      statusCode,
+    } = await request(app).post('/user').send({ user: {} });
+    const user = await User.find({});
+
+    expect(success).toBe(false);
+    expect(error.name).toBe('ApplicationError');
+    expect(statusCode).toBe(VALIDATION_ERROR.statusCode);
+    expect(error.code).toBe(VALIDATION_ERROR.code);
+    expect(error.validationErrors).toEqual(expectedValidError);
+    expect(user.length).toBe(0);
+  });
+
+  test('should not register user if unique constraint on email and username is not met.', async () => {
+    const email = 'shraddha1998@gmail.com';
+    const password = 'shraddha1998';
+    const username = 'shraddha98';
+    const expectedValidError = {
+      email: { type: 'unique', message: expect.any(String) },
+      username: { type: 'unique', message: expect.any(String) },
+    };
+
+    const { status } = await request(app)
+      .post('/user')
+      .send({ user: { email, password, username } });
+
+    expect(status).toBe(201);
+
+    const {
+      body: { error, success },
+      statusCode,
+    } = await request(app)
+      .post('/user')
+      .send({ user: { email, password, username } });
+    const user = await User.find({ email });
+
+    expect(success).toBe(false);
+    expect(error.name).toBe('ApplicationError');
+    expect(error.code).toBe(VALIDATION_ERROR.code);
+    expect(statusCode).toBe(VALIDATION_ERROR.statusCode);
+    expect(error.validationErrors).toEqual(expectedValidError);
+    expect(user.length).toBe(1);
+  });
+
+  test('should not register user if password does not meet criteria', async () => {
+    const email = 'shraddha1998@gmail.com';
+    const password = 'abc';
+    const username = 'shraddha98';
+    const expectedValidError = {
+      password: { type: 'minlength', message: expect.any(String) },
+    };
+
+    const {
+      body: { error, success },
+      statusCode,
+    } = await request(app)
+      .post('/user')
+      .send({ user: { email, password, username } });
+
+    expect(success).toBe(false);
+    expect(error.name).toBe('ApplicationError');
+    expect(error.code).toBe(VALIDATION_ERROR.code);
+    expect(statusCode).toBe(VALIDATION_ERROR.statusCode);
+    expect(error.validationErrors).toEqual(expectedValidError);
+
+    const user = await User.find({});
+    expect(user.length).toBe(0);
+  });
+
   test('should register new user to database.', async () => {
     /**
      * Was user added to db?
@@ -56,6 +145,7 @@ describe('Testing POST /user endpoint', () => {
       user: { email, password, username },
     });
     const savedUser = await User.find({ email });
+
     expect(success).toBe(true);
     expect(statusCode).toBe(201);
     expect(savedUser.length).toBe(1);
