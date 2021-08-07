@@ -78,4 +78,24 @@ describe('Testing POST /auth/login endpoint', () => {
     expect(emailAuth).toMatchObject(expected);
     expect(usernameAuth).toMatchObject(expected);
   });
+
+  test('should return AUTHENTICATION_ERROR error on incorrect password', async () => {
+    const email = 'shraddha1998@gmail.com';
+    const password = 'shraddha1998';
+    const username = 'shraddha98';
+    await request(app).post('/user').send({
+      user: { email, password, username },
+    });
+
+    const {
+      body: { error },
+      statusCode,
+    } = await request(app)
+      .post('/auth/login')
+      .send({ email, password: 'incorrect' });
+
+    expect(statusCode).toBe(AUTHENTICATION_ERROR.statusCode);
+    expect(error.code).toBe(AUTHENTICATION_ERROR.code);
+    expect(error.message).toBe(AUTHENTICATION_ERROR.message);
+  });
 });
