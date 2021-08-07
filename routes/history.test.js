@@ -10,7 +10,7 @@ const { User } = require('../models/user.model');
 const { ErrorTypes } = require('../lib/index');
 
 const { UNAUTHORIZED, INVALID_PARAMETERS } = ErrorTypes;
-app.listen(3001, () => {
+const server = app.listen(3001, () => {
   console.log('listening on port 3001');
 });
 
@@ -110,6 +110,7 @@ beforeEach(async () => {
 });
 
 afterAll(async () => {
+  server.close();
   await mongoose.connection.db.dropCollection('histories');
   await mongoose.connection.db.dropCollection('users');
   await mongoose.connection.db.dropCollection('quizzes');
