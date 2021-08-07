@@ -13,7 +13,6 @@ const { UNAUTHORIZED, INVALID_PARAMETERS } = ErrorTypes;
 const server = app.listen(3001, () => {
   console.log('listening on port 3001');
 });
-
 const testUsers = [
   {
     username: 'test1',
@@ -30,8 +29,7 @@ const testUsers = [
     userId: null,
   },
 ];
-
-const testQuiz = [
+let testQuiz = [
   {
     name: 'test quiz 1',
     description: 'test quiz 1',
@@ -76,21 +74,9 @@ beforeAll(async () => {
       },
     );
     await History.deleteMany({});
-    console.log('DB connected');
-
     await User.create(testUsers);
-    await Quiz.create(testQuiz);
+    testQuiz = await Quiz.create(testQuiz);
 
-    //   testUsers.forEach(async (user, index, arr) => {
-    //     const {
-    //       body: {
-    //         data: { authToken },
-    //       },
-    //     } = await request(app)
-    //       .post('/auth/login')
-    //       .send({ email: user.email, password: user.password });
-    //     arr[index].authToken = authToken;
-    // });
     for (let it = 0; it < testUsers.length; it += 1) {
       const {
         body: { data },
@@ -116,12 +102,13 @@ afterAll(async () => {
   await mongoose.connection.db.dropCollection('quizzes');
 });
 
-describe('Testing /history endpoint for quiz api', () => {
+describe('Testing /history endpoint', () => {
   test('should return UNAUTHORIZED error on GET /history without authorization token', async () => {
     const {
       body: { error },
       statusCode,
     } = await request(app).get('/history');
+
     expect(error.name).toBe('ApplicationError');
     expect(statusCode).toBe(UNAUTHORIZED.statusCode);
     expect(error.code).toBe(UNAUTHORIZED.code);
@@ -132,6 +119,7 @@ describe('Testing /history endpoint for quiz api', () => {
       body: { error },
       statusCode,
     } = await request(app).post('/history');
+
     expect(error.name).toBe('ApplicationError');
     expect(statusCode).toBe(UNAUTHORIZED.statusCode);
     expect(error.code).toBe(UNAUTHORIZED.code);
@@ -144,14 +132,14 @@ describe('Testing /history endpoint for quiz api', () => {
     } = await request(app)
       .post('/history')
       .set('Authorization', testUsers[0].authToken);
+
     expect(error.name).toBe('ApplicationError');
     expect(statusCode).toBe(INVALID_PARAMETERS.statusCode);
     expect(error.code).toBe(INVALID_PARAMETERS.code);
   });
 
   test('should create a new History document on POST /history with valid quizId and score param', async () => {
-    const quiz = await Quiz.find({});
-    const quizId = quiz[0]._id;
+    const quizId = testQuiz[0]._id;
     const score = 10;
     const { userId, authToken } = testUsers[0];
 
@@ -163,8 +151,8 @@ describe('Testing /history endpoint for quiz api', () => {
         score,
         userId,
       });
-
     const history = await History.find({ quiz: quizId, user: userId });
+
     expect(statusCode).toBe(204);
     expect(history.length).toBe(1);
     expect(history[0].user.toString()).toBe(userId.toString());
@@ -174,24 +162,23 @@ describe('Testing /history endpoint for quiz api', () => {
   });
 
   test('should update score field in existing History document on POST /history with valid quizId and score param', async () => {
-    const quiz = await Quiz.find({});
-    const quizId = quiz[0]._id;
+    const quizId = testQuiz[0]._id;
     const score = 10;
     const newScore = 20;
     const { userId, authToken } = testUsers[0];
+
     await request(app).post('/history').set('Authorization', authToken).send({
       quizId,
       score,
       userId,
     });
-
     await request(app).post('/history').set('Authorization', authToken).send({
       quizId,
       score: newScore,
       userId,
     });
-
     const history = await History.find({ quiz: quizId, user: userId });
+
     expect(history.length).toBe(1);
     expect(history[0].user.toString()).toBe(userId.toString());
     expect(history[0].quiz.toString()).toBe(quizId.toString());
@@ -200,21 +187,22 @@ describe('Testing /history endpoint for quiz api', () => {
   });
 
   test('should return leaderboard containing aggregated points in desc order by updatedAt field on POST /history with type="leaderboard"', async () => {
-    const quiz = await Quiz.find({});
+    const quizId1 = testQuiz[0]._id;
+    const quizId2 = testQuiz[1]._id;
     const testHistory = {
       [testUsers[0].authToken]: [
         {
-          quizId: quiz[0]._id,
+          quizId: quizId1,
           score: 11,
         },
         {
-          quizId: quiz[1]._id,
+          quizId: quizId2,
           score: 20,
         },
       ],
       [testUsers[1].authToken]: [
         {
-          quizId: quiz[0]._id,
+          quizId: quizId1,
           score: 25,
         },
       ],
@@ -255,22 +243,22 @@ describe('Testing /history endpoint for quiz api', () => {
   });
 
   test('should return player history on GET /history with no type data', async () => {
-    const quiz = await Quiz.find({});
-    const quizId = quiz[0]._id;
+    const quizId = testQuiz[0]._id;
     const score = 10;
     const { userId, authToken } = testUsers[0];
+
     await request(app).post('/history').set('Authorization', authToken).send({
       quizId,
       score,
       userId,
     });
-
     const {
       body: {
         data: { history },
       },
       statusCode,
     } = await request(app).get('/history').set('Authorization', authToken);
+
     expect(statusCode).toBe(200);
     expect(history.length).toBe(1);
     expect(history[0].user.toString()).toBe(userId.toString());
