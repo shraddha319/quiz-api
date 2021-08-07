@@ -33,14 +33,49 @@ afterAll(async () => {
 });
 
 describe('Testing POST /auth/login endpoint', () => {
-  test.only('should return INVALID_PARAMETERS error if email or username or password are missing', async () => {
+  test('should return INVALID_PARAMETERS error if email or username or password are missing', async () => {
     const {
       body: { error, success },
       statusCode,
-    } = await request(app).post('/auth/login');
+    } = await request(app).post('/auth/login').send({});
 
     expect(success).toBe(false);
     expect(statusCode).toBe(INVALID_PARAMETERS.statusCode);
     expect(error.code).toBe(INVALID_PARAMETERS.code);
+  });
+
+  test('should authenticate a registered user with email/username and password and return token', async () => {
+    const email = 'shraddha1998@gmail.com';
+    const password = 'shraddha1998';
+    const username = 'shraddha98';
+
+    const {
+      body: {
+        data: { user },
+      },
+    } = await request(app).post('/user').send({
+      user: { email, password, username },
+    });
+
+    // login with email
+    const {
+      body: { data: emailAuth },
+      statusCode: emailAuthStatusCode,
+    } = await request(app).post('/auth/login').send({ email, password });
+
+    // login with username
+    const {
+      body: { data: usernameAuth },
+      statusCode: usernameAuthStatusCode,
+    } = await request(app).post('/auth/login').send({ username, password });
+    const expected = {
+      userId: user._id,
+      authToken: expect.any(String),
+    };
+
+    expect(emailAuthStatusCode).toBe(200);
+    expect(usernameAuthStatusCode).toBe(200);
+    expect(emailAuth).toMatchObject(expected);
+    expect(usernameAuth).toMatchObject(expected);
   });
 });
