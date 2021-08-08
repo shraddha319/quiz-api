@@ -215,12 +215,18 @@ describe('Testing /history endpoint', () => {
     }
     const expected = [
       {
-        _id: testUsers[0].userId,
+        _id: {
+          username: testUsers[0].username,
+          email: testUsers[0].email,
+        },
         points: 31,
         timestamp: expect.any(String),
       },
       {
-        _id: testUsers[1].userId,
+        _id: {
+          username: testUsers[1].username,
+          email: testUsers[1].email,
+        },
         points: 25,
         timestamp: expect.any(String),
       },

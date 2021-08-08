@@ -6,6 +6,8 @@ const {
   ApplicationError,
 } = require('../lib/index');
 const History = require('../models/history.model');
+const { User } = require('../models/user.model');
+const Quiz = require('../models/quiz.model');
 const tokenVerifier = require('../middleware/tokenVerifier');
 
 const router = express.Router();
@@ -21,10 +23,34 @@ router
       if (type === 'leaderboard') {
         const leaderboard = await History.aggregate([
           {
+            $lookup: {
+              from: User.collection.name,
+              localField: 'user',
+              foreignField: '_id',
+              as: 'user',
+            },
+          },
+          {
+            $unwind: '$user',
+          },
+          {
+            $project: {
+              user: { username: '$user.username', email: '$user.email' },
+              score: 1,
+              updatedAt: 1,
+            },
+          },
+          {
             $group: {
               _id: '$user',
               points: { $sum: '$score' },
               timestamp: { $max: '$updatedAt' },
+            },
+          },
+          {
+            $sort: {
+              score: -1,
+              timestamp: 1,
             },
           },
         ]);
