@@ -46,12 +46,10 @@ const deleteUserById = async (req, res, next) => {
 };
 
 const getUser = async (req, res, next) => {
-  const email = req.header('email');
-  const username = req.header('username');
+  const key = req.header('key');
+  const value = req.header('value');
 
-  let user;
-  if (email) user = await User.findOne({ email });
-  else user = await User.findOne({ username });
+  const user = await User.findOne({ [key]: value });
   if (!user) return next(new ApplicationError(RESOURCE_NOT_FOUND));
   return sendResponse({ res, statusCode: 200 });
 };

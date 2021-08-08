@@ -153,7 +153,7 @@ describe('Testing POST /user endpoint', () => {
     expect(savedUser[0].password).toBeTruthy();
   });
 
-  test('Should return 200 status if email/username already exists', async () => {
+  test.only('Should return 200 status if email/username already exists', async () => {
     const email = 'shraddha1998@gmail.com';
     const password = 'shraddha1998';
     const username = 'shraddha98';
@@ -161,10 +161,14 @@ describe('Testing POST /user endpoint', () => {
       user: { email, password, username },
     });
 
-    const emailReq = await request(app).head('/user').set('email', email);
+    const emailReq = await request(app)
+      .head('/user')
+      .set('key', 'email')
+      .set('value', email);
     const usernameReq = await request(app)
       .head('/user')
-      .set('username', username);
+      .set('key', 'username')
+      .set('value', username);
 
     expect(emailReq.statusCode).toBe(200);
     expect(emailReq.body).toEqual({});
@@ -172,14 +176,18 @@ describe('Testing POST /user endpoint', () => {
     expect(usernameReq.body).toEqual({});
   });
 
-  test('Should return 404 status if email/username does not exist', async () => {
+  test.only('Should return 404 status if email/username does not exist', async () => {
     const email = 'shraddha1998@gmail.com';
     const username = 'shraddha98';
 
-    const emailReq = await request(app).head('/user').set('email', email);
+    const emailReq = await request(app)
+      .head('/user')
+      .set('key', 'email')
+      .set('value', email);
     const usernameReq = await request(app)
       .head('/user')
-      .set('username', username);
+      .set('key', 'username')
+      .set('value', username);
 
     expect(emailReq.statusCode).toBe(404);
     expect(emailReq.body).toEqual({});
