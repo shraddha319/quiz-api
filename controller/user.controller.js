@@ -46,8 +46,7 @@ const deleteUserById = async (req, res, next) => {
 };
 
 const getUser = async (req, res, next) => {
-  const key = req.header('key');
-  const value = req.header('value');
+  const { key, value } = req.headers;
 
   const user = await User.findOne({ [key]: value });
   if (!user) return next(new ApplicationError(RESOURCE_NOT_FOUND));
