@@ -69,7 +69,7 @@ describe('Testing POST /auth/login endpoint', () => {
       statusCode: usernameAuthStatusCode,
     } = await request(app).post('/auth/login').send({ username, password });
     const expected = {
-      userId: user._id,
+      user,
       authToken: expect.any(String),
     };
 
