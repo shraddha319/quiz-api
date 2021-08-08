@@ -184,7 +184,7 @@ describe('Testing /history endpoint', () => {
     expect(history[0].updatedAt).toBeTruthy();
   });
 
-  test('should return leaderboard containing aggregated points in desc order by updatedAt field on POST /history with type="leaderboard"', async () => {
+  test('should return leaderboard containing aggregated points in desc order by updatedAt field on GET /history with type="leaderboard"', async () => {
     const quizId1 = testQuiz[0]._id;
     const quizId2 = testQuiz[1]._id;
     const testHistory = {
@@ -234,7 +234,7 @@ describe('Testing /history endpoint', () => {
     } = await request(app)
       .get('/history')
       .set('Authorization', testUsers[0].authToken)
-      .send({ type: 'leaderboard' });
+      .query({ type: 'leaderboard' });
 
     expect(statusCode).toBe(200);
     expect(leaderboard).toEqual(expect.arrayContaining(expected));

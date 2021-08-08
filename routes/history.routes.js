@@ -16,7 +16,8 @@ router
   .route('/')
   .get(
     catchAsync(async (req, res, next) => {
-      const { type } = req.body;
+      const { type } = req.query;
+
       if (type === 'leaderboard') {
         const leaderboard = await History.aggregate([
           {
