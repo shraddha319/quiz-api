@@ -124,11 +124,6 @@ describe('Testing POST /user endpoint', () => {
   });
 
   test('should register new user to database.', async () => {
-    /**
-     * Was user added to db?
-     * Was a userId returned?
-     * StatusCode must be 201
-     */
     const email = 'shraddha1998@gmail.com';
     const password = 'shraddha1998';
     const username = 'shraddha98';
@@ -153,7 +148,7 @@ describe('Testing POST /user endpoint', () => {
     expect(savedUser[0].password).toBeTruthy();
   });
 
-  test.only('Should return 200 status if email/username already exists', async () => {
+  test('Should return 200 status if email/username already exists', async () => {
     const email = 'shraddha1998@gmail.com';
     const password = 'shraddha1998';
     const username = 'shraddha98';
@@ -176,7 +171,7 @@ describe('Testing POST /user endpoint', () => {
     expect(usernameReq.body).toEqual({});
   });
 
-  test.only('Should return 404 status if email/username does not exist', async () => {
+  test('Should return 404 status if email/username does not exist', async () => {
     const email = 'shraddha1998@gmail.com';
     const username = 'shraddha98';
 
