@@ -5,29 +5,24 @@ const { json } = require('body-parser');
 const cors = require('cors');
 const { PORT, NODE_ENV } = require('./config');
 const { connectDB } = require('./lib');
-const errorHandler = require('./middleware/errorHandler');
-const notFoundHandler = require('./middleware/notFoundHandler');
-const userRouter = require('./routes/user.routes');
-const authRouter = require('./routes/auth.routes');
-const quizRouter = require('./routes/quiz.routes');
-const historyRouter = require('./routes/history.routes');
+const { errorHandler, notFoundHandler } = require('./middlewares');
+const userRouter = require('./routes/user.route');
+const authRouter = require('./routes/auth.route');
+const quizRouter = require('./routes/quiz.route');
 
 if (NODE_ENV !== 'test') connectDB();
 
 const app = express();
-const port = PORT || 3000;
-
-app.use(json());
-app.use(cors());
 
 app.get('/', (req, res) => {
   res.send('Hello, world!');
 });
 
-app.use('/auth', authRouter);
-app.use('/user', userRouter);
+app.use(json());
+app.use(cors());
 app.use('/quiz', quizRouter);
-app.use('/history', historyRouter);
+app.use('/auth', authRouter);
+app.use('/users', userRouter);
 
 /**
  * 404 Error handler
@@ -41,8 +36,8 @@ app.all('*', notFoundHandler);
  */
 app.use(errorHandler);
 
-if (NODE_ENV !== 'test')
-  app.listen(port, () => {
-    console.log('server listening on port: ', port);
-  });
-else module.exports = app;
+const server = app.listen(PORT, () => {
+  console.log('server listening on port: ', PORT);
+});
+
+module.exports = { app, server };
