@@ -20,7 +20,7 @@ const getScore = async (req, res) => {
       },
       {
         $project: {
-          user: { email: '$user.email', name: '$user.firstName' },
+          user: { firstName: '$user.firstName', lastName: '$user.lastName' },
           score: 1,
           updatedAt: 1,
         },
@@ -47,7 +47,9 @@ const getScore = async (req, res) => {
     });
   }
 
-  const userScore = await Score.find({ user: req.userId });
+  const userScore = await Score.find({ user: req.userId })
+    .populate('quiz', 'name')
+    .exec();
 
   return sendResponse({
     res,
@@ -67,7 +69,7 @@ const postScore = async (req, res) => {
       quiz,
       score,
     });
-  else {
+  else if (history.score < score) {
     history.score = score;
     await history.save();
   }
