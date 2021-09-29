@@ -3,9 +3,14 @@ const Joi = require('joi');
 // TODO - test input schema
 
 const login = {
+  headers: Joi.object()
+    .keys({
+      Authorization: Joi.string(),
+    })
+    .unknown(true),
   body: Joi.object().keys({
-    email: Joi.string().required().email(),
-    password: Joi.string().required(),
+    email: Joi.string(),
+    password: Joi.string(),
   }),
 };
 
